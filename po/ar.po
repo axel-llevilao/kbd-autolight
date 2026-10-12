@@ -1,0 +1,39 @@
+# kbd-autolight Plasma applet — ar
+msgid ""
+msgstr ""
+"Project-Id-Version: kbd-autolight 1.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: 2026-10-12 00:00-0300\n"
+"Last-Translator: kbd-autolight\n"
+"Language-Team: ar\n"
+"Language: ar\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Automatic keyboard brightness"
+msgstr "السطوع التلقائي للوحة المفاتيح"
+
+msgid "Adjusts the keyboard backlight to the ambient light"
+msgstr "يضبط الإضاءة الخلفية للوحة المفاتيح حسب الإضاءة المحيطة"
+
+msgid "Ambient light: %1 lux"
+msgstr "الإضاءة المحيطة: %1 لوكس"
+
+msgid "Keyboard backlight: level %1 of %2"
+msgstr "الإضاءة الخلفية: المستوى %1 من %2"
+
+msgid "Paused after a manual change (%1 min left)"
+msgstr "متوقف مؤقتًا بعد تغيير يدوي (متبقٍ %1 د)"
+
+msgid "Resume now"
+msgstr "استئناف الآن"
+
+msgid "Active"
+msgstr "مفعّل"
+
+msgid "Inactive"
+msgstr "معطّل"
+
+msgid "Light sensor not available"
+msgstr "مستشعر الضوء غير متاح"

@@ -1,0 +1,39 @@
+# kbd-autolight Plasma applet — nl
+msgid ""
+msgstr ""
+"Project-Id-Version: kbd-autolight 1.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: 2026-10-12 00:00-0300\n"
+"Last-Translator: kbd-autolight\n"
+"Language-Team: nl\n"
+"Language: nl\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Automatic keyboard brightness"
+msgstr "Automatische toetsenbordhelderheid"
+
+msgid "Adjusts the keyboard backlight to the ambient light"
+msgstr "Past de toetsenbordverlichting aan het omgevingslicht aan"
+
+msgid "Ambient light: %1 lux"
+msgstr "Omgevingslicht: %1 lux"
+
+msgid "Keyboard backlight: level %1 of %2"
+msgstr "Toetsenbordverlichting: niveau %1 van %2"
+
+msgid "Paused after a manual change (%1 min left)"
+msgstr "Gepauzeerd na een handmatige wijziging (nog %1 min)"
+
+msgid "Resume now"
+msgstr "Nu hervatten"
+
+msgid "Active"
+msgstr "Actief"
+
+msgid "Inactive"
+msgstr "Inactief"
+
+msgid "Light sensor not available"
+msgstr "Lichtsensor niet beschikbaar"

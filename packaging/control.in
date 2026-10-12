@@ -1,0 +1,19 @@
+Package: kbd-autolight
+Version: @VERSION@
+Section: utils
+Priority: optional
+Architecture: all
+Maintainer: @MAINTAINER@
+Installed-Size: @SIZE@
+Depends: python3 (>= 3.9), python3-gi, gir1.2-glib-2.0, upower, systemd
+Recommends: plasma-workspace (>= 4:6.0)
+Homepage: @HOMEPAGE@
+Description: automatic keyboard backlight for the Lenovo Yoga Slim 7 ProX 14ARH7
+ Turns the keyboard backlight up in the dark and off in bright light,
+ using the laptop's ambient light sensor. It runs as a systemd user
+ service, talks to the keyboard through UPower (no root needed) and
+ pauses itself when you change the brightness by hand.
+ .
+ Includes a KDE Plasma system tray applet with an on/off switch.
+ .
+ Made and tested for the Yoga Slim 7 ProX 14ARH7 (type 82TL).

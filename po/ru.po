@@ -1,0 +1,39 @@
+# kbd-autolight Plasma applet — ru
+msgid ""
+msgstr ""
+"Project-Id-Version: kbd-autolight 1.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: 2026-10-12 00:00-0300\n"
+"Last-Translator: kbd-autolight\n"
+"Language-Team: ru\n"
+"Language: ru\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Automatic keyboard brightness"
+msgstr "Автоматическая яркость клавиатуры"
+
+msgid "Adjusts the keyboard backlight to the ambient light"
+msgstr "Настраивает подсветку клавиатуры по окружающему освещению"
+
+msgid "Ambient light: %1 lux"
+msgstr "Окружающее освещение: %1 лк"
+
+msgid "Keyboard backlight: level %1 of %2"
+msgstr "Подсветка: уровень %1 из %2"
+
+msgid "Paused after a manual change (%1 min left)"
+msgstr "Приостановлено после ручного изменения (осталось %1 мин.)"
+
+msgid "Resume now"
+msgstr "Возобновить"
+
+msgid "Active"
+msgstr "Включено"
+
+msgid "Inactive"
+msgstr "Выключено"
+
+msgid "Light sensor not available"
+msgstr "Датчик освещённости недоступен"

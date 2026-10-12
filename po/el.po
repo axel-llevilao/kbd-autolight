@@ -1,0 +1,39 @@
+# kbd-autolight Plasma applet — el
+msgid ""
+msgstr ""
+"Project-Id-Version: kbd-autolight 1.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: 2026-10-12 00:00-0300\n"
+"Last-Translator: kbd-autolight\n"
+"Language-Team: el\n"
+"Language: el\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Automatic keyboard brightness"
+msgstr "Αυτόματη φωτεινότητα πληκτρολογίου"
+
+msgid "Adjusts the keyboard backlight to the ambient light"
+msgstr "Προσαρμόζει τον οπισθοφωτισμό του πληκτρολογίου στο φως του περιβάλλοντος"
+
+msgid "Ambient light: %1 lux"
+msgstr "Φως περιβάλλοντος: %1 lux"
+
+msgid "Keyboard backlight: level %1 of %2"
+msgstr "Οπισθοφωτισμός: επίπεδο %1 από %2"
+
+msgid "Paused after a manual change (%1 min left)"
+msgstr "Σε παύση μετά από χειροκίνητη αλλαγή (απομένουν %1 λεπ.)"
+
+msgid "Resume now"
+msgstr "Συνέχιση τώρα"
+
+msgid "Active"
+msgstr "Ενεργό"
+
+msgid "Inactive"
+msgstr "Ανενεργό"
+
+msgid "Light sensor not available"
+msgstr "Ο αισθητήρας φωτός δεν είναι διαθέσιμος"

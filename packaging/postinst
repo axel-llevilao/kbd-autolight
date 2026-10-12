@@ -1,0 +1,25 @@
+#!/bin/sh
+set -e
+
+if [ "$1" = "configure" ]; then
+    product="$(cat /sys/class/dmi/id/product_name 2>/dev/null || true)"
+    family="$(cat /sys/class/dmi/id/product_version 2>/dev/null || true)"
+    case "$product $family" in
+        *82TL*|*"Yoga Slim 7 ProX 14ARH7"*) ;;
+        *)
+            echo "kbd-autolight: warning: this computer ($product $family) is not a" >&2
+            echo "  Yoga Slim 7 ProX 14ARH7 (82TL). It may still work if it has an ambient" >&2
+            echo "  light sensor and a keyboard backlight that UPower can control." >&2
+            ;;
+    esac
+
+    if [ -e /etc/systemd/system/kbd-autolight.service ]; then
+        echo "kbd-autolight: an older manual install was found. Remove it with:" >&2
+        echo "  sudo systemctl disable --now kbd-autolight.service" >&2
+        echo "  sudo rm /etc/systemd/system/kbd-autolight.service /usr/local/bin/kbd-autolight.py" >&2
+    fi
+
+    echo "kbd-autolight: turn it on from the tray applet, or run: kbd-autolight enable"
+fi
+
+exit 0

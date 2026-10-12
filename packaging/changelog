@@ -1,0 +1,6 @@
+kbd-autolight (1.0.0) unstable; urgency=medium
+
+  * First release: user service with UPower, Plasma 6 tray applet,
+    translations into 30 languages.
+
+ -- Axel <axel-llevilao@users.noreply.github.com>  Mon, 12 Oct 2026 18:00:00 -0300

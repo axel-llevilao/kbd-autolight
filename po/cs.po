@@ -1,0 +1,39 @@
+# kbd-autolight Plasma applet — cs
+msgid ""
+msgstr ""
+"Project-Id-Version: kbd-autolight 1.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: 2026-10-12 00:00-0300\n"
+"Last-Translator: kbd-autolight\n"
+"Language-Team: cs\n"
+"Language: cs\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Automatic keyboard brightness"
+msgstr "Automatický jas klávesnice"
+
+msgid "Adjusts the keyboard backlight to the ambient light"
+msgstr "Přizpůsobuje podsvícení klávesnice okolnímu světlu"
+
+msgid "Ambient light: %1 lux"
+msgstr "Okolní světlo: %1 lx"
+
+msgid "Keyboard backlight: level %1 of %2"
+msgstr "Podsvícení: úroveň %1 z %2"
+
+msgid "Paused after a manual change (%1 min left)"
+msgstr "Pozastaveno po ruční změně (zbývá %1 min)"
+
+msgid "Resume now"
+msgstr "Obnovit nyní"
+
+msgid "Active"
+msgstr "Aktivní"
+
+msgid "Inactive"
+msgstr "Neaktivní"
+
+msgid "Light sensor not available"
+msgstr "Světelný senzor není dostupný"

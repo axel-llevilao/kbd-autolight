@@ -1,0 +1,39 @@
+# kbd-autolight Plasma applet — ro
+msgid ""
+msgstr ""
+"Project-Id-Version: kbd-autolight 1.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: 2026-10-12 00:00-0300\n"
+"Last-Translator: kbd-autolight\n"
+"Language-Team: ro\n"
+"Language: ro\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Automatic keyboard brightness"
+msgstr "Luminozitate automată a tastaturii"
+
+msgid "Adjusts the keyboard backlight to the ambient light"
+msgstr "Ajustează iluminarea tastaturii în funcție de lumina ambientală"
+
+msgid "Ambient light: %1 lux"
+msgstr "Lumină ambientală: %1 lx"
+
+msgid "Keyboard backlight: level %1 of %2"
+msgstr "Iluminare: nivelul %1 din %2"
+
+msgid "Paused after a manual change (%1 min left)"
+msgstr "În pauză după o modificare manuală (mai sunt %1 min)"
+
+msgid "Resume now"
+msgstr "Reia acum"
+
+msgid "Active"
+msgstr "Activ"
+
+msgid "Inactive"
+msgstr "Inactiv"
+
+msgid "Light sensor not available"
+msgstr "Senzorul de lumină nu este disponibil"

@@ -1,0 +1,43 @@
+.TH KBD-AUTOLIGHT 1 "October 2026" "kbd-autolight 1.0.0" "User Commands"
+.SH NAME
+kbd-autolight \- automatic keyboard backlight from ambient light
+.SH SYNOPSIS
+.B kbd-autolight
+.RI { run " [" \-\-debug "] | " status " | " enable " | " disable " | " toggle " | " resume }
+.SH DESCRIPTION
+.B kbd-autolight
+reads the ambient light sensor of the Lenovo Yoga Slim 7 ProX 14ARH7 and sets
+the keyboard backlight through UPower: maximum level in the dark, low level in
+dim light and off in a lit room. It runs as a systemd user service and pauses
+itself for a while when the brightness is changed by hand.
+.SH COMMANDS
+.TP
+.B run
+Run the service in the foreground. With
+.BR \-\-debug ,
+print every sensor reading.
+.TP
+.B status
+Print the current state as JSON (used by the Plasma applet).
+.TP
+.B enable
+Start the user service now and at every login.
+.TP
+.B disable
+Stop the user service and keep it off.
+.TP
+.B toggle
+Switch between enable and disable.
+.TP
+.B resume
+Cancel a pause caused by a manual change.
+.SH FILES
+.TP
+.I /etc/kbd-autolight.conf
+System-wide settings.
+.TP
+.I ~/.config/kbd-autolight.conf
+Per-user settings; they override the system-wide file.
+.SH SEE ALSO
+.BR systemctl (1),
+.BR upower (1)

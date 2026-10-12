@@ -1,0 +1,40 @@
+# Translation template for the kbd-autolight Plasma applet.
+# Copy to <language-code>.po, fill in msgstr and send a pull request.
+msgid ""
+msgstr ""
+"Project-Id-Version: kbd-autolight 1.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: 2026-10-12 00:00-0300\n"
+"Last-Translator: kbd-autolight\n"
+"Language-Team: \n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Automatic keyboard brightness"
+msgstr ""
+
+msgid "Adjusts the keyboard backlight to the ambient light"
+msgstr ""
+
+msgid "Ambient light: %1 lux"
+msgstr ""
+
+msgid "Keyboard backlight: level %1 of %2"
+msgstr ""
+
+msgid "Paused after a manual change (%1 min left)"
+msgstr ""
+
+msgid "Resume now"
+msgstr ""
+
+msgid "Active"
+msgstr ""
+
+msgid "Inactive"
+msgstr ""
+
+msgid "Light sensor not available"
+msgstr ""

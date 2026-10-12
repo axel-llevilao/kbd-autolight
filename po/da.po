@@ -1,0 +1,39 @@
+# kbd-autolight Plasma applet — da
+msgid ""
+msgstr ""
+"Project-Id-Version: kbd-autolight 1.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: 2026-10-12 00:00-0300\n"
+"Last-Translator: kbd-autolight\n"
+"Language-Team: da\n"
+"Language: da\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Automatic keyboard brightness"
+msgstr "Automatisk lysstyrke for tastaturet"
+
+msgid "Adjusts the keyboard backlight to the ambient light"
+msgstr "Tilpasser tastaturets baggrundsbelysning efter det omgivende lys"
+
+msgid "Ambient light: %1 lux"
+msgstr "Omgivende lys: %1 lux"
+
+msgid "Keyboard backlight: level %1 of %2"
+msgstr "Baggrundsbelysning: niveau %1 af %2"
+
+msgid "Paused after a manual change (%1 min left)"
+msgstr "Sat på pause efter en manuel ændring (%1 min tilbage)"
+
+msgid "Resume now"
+msgstr "Genoptag nu"
+
+msgid "Active"
+msgstr "Aktiv"
+
+msgid "Inactive"
+msgstr "Inaktiv"
+
+msgid "Light sensor not available"
+msgstr "Lyssensoren er ikke tilgængelig"

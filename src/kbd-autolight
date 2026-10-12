@@ -1,0 +1,402 @@
+#!/usr/bin/python3
+# SPDX-License-Identifier: MIT
+"""kbd-autolight: automatic keyboard backlight for the Lenovo Yoga Slim 7 ProX 14ARH7.
+
+Reads the ambient light sensor (IIO, sysfs) and sets the keyboard backlight
+through UPower, the same interface KDE Plasma uses. Runs as a systemd *user*
+service, so it needs no root privileges.
+
+Commands:
+  kbd-autolight run [--debug]   run the service in the foreground
+  kbd-autolight status          print the current state as JSON (used by the applet)
+  kbd-autolight enable          start the service now and at every login
+  kbd-autolight disable         stop the service and keep it off
+  kbd-autolight toggle          switch between enable and disable
+  kbd-autolight resume          cancel a pause caused by a manual change
+"""
+
+import configparser
+import glob
+import json
+import os
+import subprocess
+import sys
+import time
+
+VERSION = "1.0.0"
+UNIT = "kbd-autolight.service"
+
+# Lets the test suite point the program at a fake sysfs tree.
+SYSFS = os.environ.get("KBD_AUTOLIGHT_SYSFS", "/sys")
+
+DEFAULTS = {
+    "dark_lux": 20.0,       # below this: keyboard at maximum level
+    "dim_lux": 100.0,       # below this: low level; above it: off
+    "margin": 0.3,          # hysteresis around each threshold (±30 %)
+    "interval": 2,          # seconds between sensor readings
+    "samples": 3,           # readings averaged together
+    "manual_pause": 600,    # seconds to stay paused after a manual change
+}
+CONFIG_FILES = (
+    "/etc/kbd-autolight.conf",
+    os.path.join(os.environ.get("XDG_CONFIG_HOME", os.path.expanduser("~/.config")),
+                 "kbd-autolight.conf"),
+)
+
+
+# --------------------------------------------------------------------------- utils
+
+def log(msg):
+    print(msg, flush=True)
+
+
+def read_text(path, default=None):
+    try:
+        with open(path) as f:
+            return f.read().strip()
+    except OSError:
+        if default is not None:
+            return default
+        raise
+
+
+def state_file():
+    runtime = os.environ.get("XDG_RUNTIME_DIR") or f"/run/user/{os.getuid()}"
+    return os.path.join(runtime, "kbd-autolight", "state.json")
+
+
+def load_config():
+    cfg = dict(DEFAULTS)
+    parser = configparser.ConfigParser()
+    parser.read(CONFIG_FILES)
+    if parser.has_section("kbd-autolight"):
+        sec = parser["kbd-autolight"]
+        for key, default in DEFAULTS.items():
+            if key in sec:
+                try:
+                    cfg[key] = type(default)(sec[key])
+                except ValueError:
+                    log(f"Ignoring invalid value for {key}: {sec[key]!r}")
+    cfg["samples"] = max(1, int(cfg["samples"]))
+    cfg["interval"] = max(1, int(cfg["interval"]))
+    return cfg
+
+
+# ------------------------------------------------------------------------ hardware
+
+def find_sensor():
+    """Return the sysfs directory of the ambient light sensor.
+
+    The Yoga Slim 7 ProX exposes two sensors named "als": a plain one and a
+    colour sensor (with chromaticity channels). The plain one is preferred.
+    """
+    plain, other = [], []
+    for dev in sorted(glob.glob(os.path.join(SYSFS, "bus/iio/devices/iio:device*"))):
+        has_lux = any(os.path.exists(os.path.join(dev, f))
+                      for f in ("in_illuminance_raw", "in_illuminance_input"))
+        if not has_lux:
+            continue
+        is_color = os.path.exists(os.path.join(dev, "in_chromaticity_x_raw"))
+        (other if is_color else plain).append(dev)
+    found = plain + other
+    return found[0] if found else None
+
+
+def read_lux(sensor):
+    value = read_text(os.path.join(sensor, "in_illuminance_input"), "")
+    if value:
+        return float(value)
+    raw = float(read_text(os.path.join(sensor, "in_illuminance_raw")))
+    scale = float(read_text(os.path.join(sensor, "in_illuminance_scale"), "1"))
+    offset = float(read_text(os.path.join(sensor, "in_illuminance_offset"), "0"))
+    return (raw + offset) * scale
+
+
+def find_led():
+    leds = sorted(glob.glob(os.path.join(SYSFS, "class/leds/*kbd_backlight")))
+    return leds[0] if leds else None
+
+
+# --------------------------------------------------------------------------- logic
+
+def target_level(lux, cur, maxb, cfg):
+    """Keyboard level for this amount of light, with hysteresis around cur."""
+    dark, dim, m = cfg["dark_lux"], cfg["dim_lux"], cfg["margin"]
+    lo_up, lo_dn = dark * (1 - m), dark * (1 + m)
+    hi_up, hi_dn = dim * (1 - m), dim * (1 + m)
+
+    if maxb <= 1:  # on/off only
+        if cur >= 1:
+            return 0 if lux > hi_dn else 1
+        return 1 if lux < hi_up else 0
+
+    if cur >= maxb:              # currently high
+        if lux <= lo_dn:
+            return maxb
+        return 0 if lux > hi_dn else 1
+    if cur <= 0:                 # currently off
+        if lux >= hi_up:
+            return 0
+        return maxb if lux < lo_up else 1
+    if lux < lo_up:              # currently low
+        return maxb
+    if lux > hi_dn:
+        return 0
+    return cur
+
+
+# ------------------------------------------------------------------------- service
+
+class Service:
+    UPOWER = "org.freedesktop.UPower"
+    UPOWER_PATH = "/org/freedesktop/UPower"
+    KBD_IFACE = "org.freedesktop.UPower.KbdBacklight"
+    GRACE_AFTER_RESUME = 8  # seconds in which changes are not treated as manual
+
+    def __init__(self, cfg, debug):
+        from gi.repository import Gio, GLib  # imported here: `status` must stay fast
+        self.Gio, self.GLib = Gio, GLib
+        self.cfg, self.debug = cfg, debug
+
+        self.sensor = find_sensor()
+        if not self.sensor:
+            log("No ambient light sensor found under /sys/bus/iio/devices.")
+            sys.exit(1)
+
+        self.bus = Gio.bus_get_sync(Gio.BusType.SYSTEM, None)
+        self.upower = Gio.DBusProxy.new_sync(
+            self.bus, Gio.DBusProxyFlags.NONE, None,
+            self.UPOWER, self.UPOWER_PATH, self.UPOWER, None)
+        self.kbd, self.max = self._find_keyboard()
+        self.kbd.connect("g-signal", self._on_kbd_signal)
+        self.bus.signal_subscribe(
+            "org.freedesktop.login1", "org.freedesktop.login1.Manager",
+            "PrepareForSleep", "/org/freedesktop/login1", None,
+            Gio.DBusSignalFlags.NONE, self._on_sleep, None)
+
+        self.readings = []
+        self.last_set = self._get_brightness()
+        self.pause_until = 0.0
+        self.grace_until = 0.0
+        self.lux = None
+
+    # -- UPower ---------------------------------------------------------------
+    def _find_keyboard(self):
+        Gio, GLib = self.Gio, self.GLib
+        paths = [self.UPOWER_PATH + "/KbdBacklight"]
+        try:  # UPower >= 1.90.3 can list several keyboard backlights
+            res = self.upower.call_sync("EnumerateKbdBacklights", None,
+                                        Gio.DBusCallFlags.NONE, -1, None)
+            paths += [p for p in res.unpack()[0] if p not in paths]
+        except GLib.Error:
+            pass
+        for path in paths:
+            try:
+                proxy = Gio.DBusProxy.new_sync(
+                    self.bus, Gio.DBusProxyFlags.DO_NOT_LOAD_PROPERTIES, None,
+                    self.UPOWER, path, self.KBD_IFACE, None)
+                maxb = proxy.call_sync("GetMaxBrightness", None,
+                                       Gio.DBusCallFlags.NONE, -1, None).unpack()[0]
+                if maxb > 0:
+                    log(f"Keyboard backlight: {path} (max {maxb}) | sensor: {self.sensor}")
+                    self.has_source_signal = self._has_signal(path, "BrightnessChangedWithSource")
+                    return proxy, maxb
+            except GLib.Error:
+                continue
+        log("UPower does not report a keyboard backlight.")
+        sys.exit(1)
+
+    def _has_signal(self, path, name):
+        try:
+            xml = self.bus.call_sync(self.UPOWER, path, "org.freedesktop.DBus.Introspectable",
+                                     "Introspect", None, None, self.Gio.DBusCallFlags.NONE,
+                                     -1, None).unpack()[0]
+            return f'name="{name}"' in xml
+        except self.GLib.Error:
+            return False
+
+    def _get_brightness(self):
+        return self.kbd.call_sync("GetBrightness", None,
+                                  self.Gio.DBusCallFlags.NONE, -1, None).unpack()[0]
+
+    def _set_brightness(self, value):
+        self.last_set = value  # before the call: the change signal compares against it
+        self.kbd.call_sync("SetBrightness", self.GLib.Variant("(i)", (value,)),
+                           self.Gio.DBusCallFlags.NONE, -1, None)
+
+    def _lid_closed(self):
+        v = self.upower.get_cached_property("LidIsClosed")
+        return bool(v.unpack()) if v is not None else False
+
+    # -- events ---------------------------------------------------------------
+    def _manual_change(self, value, why):
+        self.last_set = value
+        if time.monotonic() < self.grace_until:
+            return
+        self.pause_until = time.monotonic() + self.cfg["manual_pause"]
+        log(f"Manual change ({why}) to level {value}; paused for "
+            f"{self.cfg['manual_pause']} s")
+        self._write_state(value)
+
+    def _on_kbd_signal(self, _proxy, _sender, signal, params):
+        args = params.unpack()
+        if signal == "BrightnessChangedWithSource":
+            value, source = args
+            if source == "internal" and value != self.last_set:
+                self._manual_change(value, "keyboard shortcut")
+            elif value != self.last_set:
+                self._manual_change(value, "another program")
+        elif (signal == "BrightnessChanged" and not self.has_source_signal
+              and args[0] != self.last_set):
+            self._manual_change(args[0], "external")
+
+    def _on_sleep(self, _conn, _sender, _path, _iface, _signal, params, _data):
+        going_to_sleep = params.unpack()[0]
+        if not going_to_sleep:  # waking up: the firmware may restore its own level
+            self.grace_until = time.monotonic() + self.GRACE_AFTER_RESUME
+            self.readings.clear()
+
+    def _on_resume_request(self):
+        self.pause_until = 0.0
+        log("Pause cancelled")
+        self._tick()
+        return True
+
+    def _on_stop(self):
+        self.loop.quit()
+        return False
+
+    # -- main loop ------------------------------------------------------------
+    def _write_state(self, level):
+        path = state_file()
+        try:
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            remaining = max(0.0, self.pause_until - time.monotonic())
+            data = {"lux": self.lux, "level": level, "max": self.max,
+                    "pause_until": time.time() + remaining if remaining else 0}
+            tmp = path + ".tmp"
+            with open(tmp, "w") as f:
+                json.dump(data, f)
+            os.replace(tmp, path)
+        except OSError:
+            pass
+
+    def _tick(self):
+        GLib = self.GLib
+        try:
+            lux = read_lux(self.sensor)
+            cur = self._get_brightness()
+        except (OSError, ValueError, GLib.Error):
+            return True
+
+        now = time.monotonic()
+        self.readings = (self.readings + [lux])[-self.cfg["samples"]:]
+        avg = sum(self.readings) / len(self.readings)
+        self.lux = round(avg, 1)
+
+        # Hardware that UPower does not report: notice the change here.
+        if cur != self.last_set:
+            self._manual_change(cur, "detected")
+
+        if self.debug:
+            log(f"lux={avg:.1f} level={cur}")
+
+        if now >= self.pause_until and now >= self.grace_until and not self._lid_closed():
+            new = target_level(avg, cur, self.max, self.cfg)
+            if new != cur:
+                try:
+                    self._set_brightness(new)
+                    log(f"{avg:.0f} lux -> level {new}")
+                    cur = new
+                except GLib.Error as e:
+                    log(f"Could not set the brightness: {e.message}")
+
+        self._write_state(cur)
+        return True
+
+    def run(self):
+        import signal
+        GLib = self.GLib
+        self.loop = GLib.MainLoop()
+        for sig in (signal.SIGTERM, signal.SIGINT):
+            GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, sig, self._on_stop)
+        GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGUSR1, self._on_resume_request)
+        self._tick()
+        GLib.timeout_add_seconds(self.cfg["interval"], self._tick)
+        self.loop.run()
+        try:
+            os.remove(state_file())
+        except OSError:
+            pass
+
+
+# ------------------------------------------------------------------------ commands
+
+def systemctl(*args):
+    return subprocess.run(["systemctl", "--user", *args],
+                          stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode
+
+
+def service_active():
+    return systemctl("is-active", "--quiet", UNIT) == 0
+
+
+def cmd_status():
+    active = service_active()
+    status = {"active": active, "lux": None, "level": None, "max": None,
+              "pause_left": 0, "sensor": False}
+
+    sensor = find_sensor()
+    if sensor:
+        status["sensor"] = True
+        try:
+            status["lux"] = round(read_lux(sensor), 1)
+        except (OSError, ValueError):
+            pass
+    led = find_led()
+    if led:
+        try:
+            status["level"] = int(read_text(os.path.join(led, "brightness")))
+            status["max"] = int(read_text(os.path.join(led, "max_brightness")))
+        except (OSError, ValueError):
+            pass
+    if active:
+        try:
+            with open(state_file()) as f:
+                state = json.load(f)
+            if state.get("lux") is not None:
+                status["lux"] = state["lux"]  # averaged value, as the service sees it
+            if state.get("pause_until"):
+                status["pause_left"] = max(0, int(state["pause_until"] - time.time()))
+        except (OSError, ValueError):
+            pass
+    print(json.dumps(status))
+    return 0
+
+
+def main(argv):
+    args = argv[1:]
+    cmd = args[0] if args else "help"
+
+    if cmd == "run":
+        Service(load_config(), debug="--debug" in args).run()
+        return 0
+    if cmd == "status":
+        return cmd_status()
+    if cmd == "enable":
+        return systemctl("enable", "--now", UNIT)
+    if cmd == "disable":
+        return systemctl("disable", "--now", UNIT)
+    if cmd == "toggle":
+        return main([argv[0], "disable" if service_active() else "enable"])
+    if cmd == "resume":
+        return systemctl("kill", "--signal=SIGUSR1", UNIT)
+    if cmd in ("--version", "version"):
+        print(f"kbd-autolight {VERSION}")
+        return 0
+    print(__doc__.strip())
+    return 0 if cmd in ("help", "-h", "--help") else 2
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv))

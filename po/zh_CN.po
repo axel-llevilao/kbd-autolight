@@ -1,0 +1,39 @@
+# kbd-autolight Plasma applet — zh_CN
+msgid ""
+msgstr ""
+"Project-Id-Version: kbd-autolight 1.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: 2026-10-12 00:00-0300\n"
+"Last-Translator: kbd-autolight\n"
+"Language-Team: zh_CN\n"
+"Language: zh_CN\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Automatic keyboard brightness"
+msgstr "键盘亮度自动调节"
+
+msgid "Adjusts the keyboard backlight to the ambient light"
+msgstr "根据环境光调节键盘背光"
+
+msgid "Ambient light: %1 lux"
+msgstr "环境光：%1 勒克斯"
+
+msgid "Keyboard backlight: level %1 of %2"
+msgstr "背光：%1 / %2 级"
+
+msgid "Paused after a manual change (%1 min left)"
+msgstr "手动调整后已暂停（剩余 %1 分钟）"
+
+msgid "Resume now"
+msgstr "立即恢复"
+
+msgid "Active"
+msgstr "已启用"
+
+msgid "Inactive"
+msgstr "已禁用"
+
+msgid "Light sensor not available"
+msgstr "光线传感器不可用"

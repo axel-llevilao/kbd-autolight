@@ -1,0 +1,39 @@
+# kbd-autolight Plasma applet — gl
+msgid ""
+msgstr ""
+"Project-Id-Version: kbd-autolight 1.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: 2026-10-12 00:00-0300\n"
+"Last-Translator: kbd-autolight\n"
+"Language-Team: gl\n"
+"Language: gl\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Automatic keyboard brightness"
+msgstr "Axuste automático do brillo do teclado"
+
+msgid "Adjusts the keyboard backlight to the ambient light"
+msgstr "Axusta a retroiluminación do teclado segundo a luz ambiente"
+
+msgid "Ambient light: %1 lux"
+msgstr "Luz ambiente: %1 lux"
+
+msgid "Keyboard backlight: level %1 of %2"
+msgstr "Retroiluminación: nivel %1 de %2"
+
+msgid "Paused after a manual change (%1 min left)"
+msgstr "En pausa tras un cambio manual (quedan %1 min)"
+
+msgid "Resume now"
+msgstr "Retomar agora"
+
+msgid "Active"
+msgstr "Activo"
+
+msgid "Inactive"
+msgstr "Inactivo"
+
+msgid "Light sensor not available"
+msgstr "O sensor de luz non está dispoñíbel"
